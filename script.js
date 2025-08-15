@@ -1,20 +1,47 @@
-// script.js
+// script.js - Performance Optimized
 
-// 🌙 Theme Toggle
+// ====== PERFORMANCE UTILITIES ======
+// Throttle function to limit event handler calls
+function throttle(func, delay) {
+  let timeoutId;
+  let lastExecTime = 0;
+  return function (...args) {
+    const currentTime = Date.now();
+    if (currentTime - lastExecTime > delay) {
+      func.apply(this, args);
+      lastExecTime = currentTime;
+    } else {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(this, args);
+        lastExecTime = Date.now();
+      }, delay - (currentTime - lastExecTime));
+    }
+  };
+}
+
+// RequestAnimationFrame throttle for smooth animations
+function rafThrottle(func) {
+  let ticking = false;
+  return function (...args) {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        func.apply(this, args);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
+}
+
+// ====== THEME TOGGLE ======
 const themeToggle = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
 const body = document.body;
 
 // Check for saved theme preference or default to 'light'
 let currentTheme = 'light';
-try {
-  currentTheme = localStorage.getItem('theme') || 'light';
-} catch (e) {
-  currentTheme = 'light';
-}
-body.setAttribute('data-theme', currentTheme);
 
-// Update icon based on current theme
 function updateThemeIcon(theme) {
   if (theme === 'dark') {
     themeIcon.className = 'fas fa-sun';
@@ -23,8 +50,11 @@ function updateThemeIcon(theme) {
   }
 }
 
-// Initialize icon
-updateThemeIcon(currentTheme);
+// Initialize theme on load
+document.addEventListener('DOMContentLoaded', () => {
+  body.setAttribute('data-theme', currentTheme);
+  updateThemeIcon(currentTheme);
+});
 
 // Theme toggle functionality
 if (themeToggle) {
@@ -33,146 +63,60 @@ if (themeToggle) {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     
     body.setAttribute('data-theme', newTheme);
-    try {
-      localStorage.setItem('theme', newTheme);
-    } catch (e) {
-      // Handle localStorage not available
-    }
     updateThemeIcon(newTheme);
   });
 }
 
-// 🔍 Scroll Spy
+// ====== OPTIMIZED SCROLL HANDLERS ======
 const sections = document.querySelectorAll('section');
 const navLinks = document.querySelectorAll('.nav-links a');
+const revealElements = document.querySelectorAll('.scroll-reveal');
 
-window.addEventListener('scroll', () => {
-  let current = '';
+// Single optimized scroll handler
+const handleScroll = rafThrottle(() => {
+  const scrollY = window.scrollY;
+  const innerHeight = window.innerHeight;
+  const triggerBottom = innerHeight * 0.85;
+
+  // Scroll spy for navigation
+  let currentSection = '';
   sections.forEach(section => {
     const sectionTop = section.offsetTop;
     const sectionHeight = section.offsetHeight;
 
-    if (window.scrollY >= sectionTop - 100 && window.scrollY < sectionTop + sectionHeight - 100) {
-      current = section.getAttribute('id');
+    if (scrollY >= sectionTop - 100 && scrollY < sectionTop + sectionHeight - 100) {
+      currentSection = section.getAttribute('id');
     }
   });
 
+  // Update active nav link
   navLinks.forEach(link => {
     link.classList.remove('active-link');
-    if (link.getAttribute('href') === `#${current}`) {
+    if (link.getAttribute('href') === `#${currentSection}`) {
       link.classList.add('active-link');
     }
   });
-}, { passive: true });
 
-// ✨ Scroll Reveal
-const revealElements = document.querySelectorAll('.scroll-reveal');
-const revealOnScroll = () => {
-  const triggerBottom = window.innerHeight * 0.85;
+  // Scroll reveal elements
   revealElements.forEach(el => {
     const boxTop = el.getBoundingClientRect().top;
     if (boxTop < triggerBottom) {
       el.classList.add('visible');
-    } else {
-      el.classList.remove('visible');
     }
   });
-};
-window.addEventListener('scroll', revealOnScroll, { passive: true });
-window.addEventListener('load', revealOnScroll);
+});
 
-// 📱 Mobile Nav Toggle
+// Add single scroll listener
+window.addEventListener('scroll', handleScroll, { passive: true });
+
+// ====== MOBILE NAVIGATION ======
 function toggleMenu() {
   const nav = document.getElementById('nav-menu');
   nav.classList.toggle('hidden');
 }
 window.toggleMenu = toggleMenu;
 
-// ✨ Button Hover Effects (Ripple)
-document.addEventListener('DOMContentLoaded', () => {
-  const addRippleEffect = (button) => {
-    button.addEventListener('click', function(e) {
-      const ripple = document.createElement('span');
-      const rect = this.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      ripple.classList.add('ripple');
-
-      this.appendChild(ripple);
-
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
-    });
-  };
-
-  document.querySelectorAll('.btn, .project-link, .social-btn, .contact-form button').forEach(addRippleEffect);
-});
-
-// 📬 Contact Form Handler
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('contactForm');
-  const toast = document.getElementById('toast');
-  const submitBtn = document.getElementById('send-btn');
-
-  if (form && submitBtn) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      // Basic validation + shake on empty
-      const fields = form.querySelectorAll('input[required], textarea[required]');
-      let hasError = false;
-      fields.forEach(field => {
-        if (!field.value.trim()) {
-          field.classList.add('shake');
-          hasError = true;
-          setTimeout(() => field.classList.remove('shake'), 400);
-        }
-      });
-      if (hasError) return;
-
-      // Start loading animation
-      submitBtn.classList.add('loading');
-
-      const formData = new FormData(form);
-      try {
-        await fetch('https://formsubmit.co/ajax/amalkphilip2005@gmail.com', {
-          method: 'POST',
-          body: formData,
-          headers: { 'Accept': 'application/json' }
-        });
-
-        // Success morph
-        submitBtn.classList.remove('loading');
-        submitBtn.classList.add('success');
-
-        form.reset();
-
-        // Toast
-        setTimeout(() => {
-          toast.classList.add('show');
-          setTimeout(() => toast.classList.remove('show'), 4000);
-        }, 250);
-
-        // Reset button visual after a moment
-        setTimeout(() => {
-          submitBtn.classList.remove('success');
-        }, 2600);
-
-      } catch (err) {
-        submitBtn.classList.remove('loading');
-        alert('⚠️ Something went wrong. Try again later.');
-      }
-    });
-  }
-});
-
-// 🌀 Enhanced Marquee Animation with Profile Picture Interaction
+// ====== OPTIMIZED SCROLL-BASED MARQUEE ANIMATION ======
 (() => {
   let lastScrollY = window.scrollY;
   let offset = 0;
@@ -182,29 +126,39 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentDirection = 1;
   let rotationAngle = 0;
   let scrollTimeout = null;
+  let animationId = null;
+  let isScrolling = false;
 
-  const SCROLL_SPEED = 1;
-  const AUTO_SPEED = 0.5;
+  const SCROLL_SPEED = 1.2;
+  const AUTO_SPEED = 0.8;
   const MIN_SPEED = 0.2;
   const EASING = 0.08;
   const ROTATION_SPEED = 1.5;
-  const MAX_OFFSET = 150;
 
-  let marquee, separators;
+  let marquee, separators, marqueeWidth;
 
-  function measure() {
+  function initMarquee() {
     marquee = document.querySelector('.marquee-content');
     separators = document.querySelectorAll('.separator');
-  }
-
-  function constrainOffset(val) {
-    return Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, val));
+    
+    if (marquee) {
+      // Get the actual content width for seamless looping
+      marqueeWidth = marquee.scrollWidth / 2; // Divide by 2 since content is duplicated
+    }
   }
 
   function applyTransform() {
-    if (!marquee) return;
-    const constrainedOffset = constrainOffset(offset);
-    marquee.style.transform = `translateX(${constrainedOffset}px)`;
+    if (!marquee || !marqueeWidth) return;
+    
+    // Create seamless infinite loop by using modulo
+    let finalOffset = offset % marqueeWidth;
+    
+    // Ensure the offset is always within one cycle for smooth transitions
+    if (finalOffset > 0) {
+      finalOffset = finalOffset - marqueeWidth;
+    }
+    
+    marquee.style.transform = `translateX(${finalOffset}px)`;
 
     if (separators) {
       separators.forEach(sep => {
@@ -213,76 +167,98 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function onScroll() {
-    const y = window.scrollY;
+  // Optimized scroll handler for marquee
+  const handleMarqueeScroll = rafThrottle(() => {
+    const scrollY = window.scrollY;
+    isScrolling = true;
 
     if (scrollTimeout) clearTimeout(scrollTimeout);
 
-    if (y > lastScrollY) {
-      lastScrollDirection = 1;
-      currentDirection = 1;
-    } else if (y < lastScrollY) {
+    // Determine scroll direction
+    if (scrollY > lastScrollY) {
+      // Scrolling down - marquee moves LEFT (negative direction)
       lastScrollDirection = -1;
       currentDirection = -1;
+    } else if (scrollY < lastScrollY) {
+      // Scrolling up - marquee moves RIGHT (positive direction)
+      lastScrollDirection = 1;
+      currentDirection = 1;
     }
 
     targetSpeed = SCROLL_SPEED;
-    lastScrollY = y;
+    lastScrollY = scrollY;
 
+    // Switch to auto-loop mode when scroll stops
     scrollTimeout = setTimeout(() => {
+      isScrolling = false;
       targetSpeed = AUTO_SPEED;
       currentDirection = lastScrollDirection;
     }, 150);
-  }
+  });
 
   function animate() {
+    // Smooth speed transition
     speed += (targetSpeed - speed) * EASING;
     if (Math.abs(speed) < MIN_SPEED) {
       speed = MIN_SPEED * Math.sign(targetSpeed || 1);
     }
+
+    // Update offset - infinite movement in both directions
     offset += speed * currentDirection;
 
-    const constrainedOffset = constrainOffset(offset);
-    if (offset !== constrainedOffset) {
-      currentDirection *= -1;
-      offset = constrainedOffset;
-    }
-
-    rotationAngle += ROTATION_SPEED;
+    // Update rotation
+    rotationAngle += ROTATION_SPEED * currentDirection;
     if (rotationAngle >= 360) rotationAngle -= 360;
+    if (rotationAngle < 0) rotationAngle += 360;
 
     applyTransform();
-    requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
   }
 
+  // Initialize on load
   window.addEventListener('load', () => {
-    measure();
-    applyTransform();
-    animate();
+    initMarquee();
+    if (marquee) {
+      applyTransform();
+      animate();
+    }
   });
-  window.addEventListener('resize', measure);
-  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Add scroll listener for marquee
+  window.addEventListener('scroll', handleMarqueeScroll, { passive: true });
+
+  // Pause animation when not visible (performance optimization)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (animationId) cancelAnimationFrame(animationId);
+    } else if (marquee) {
+      animate();
+    }
+  });
+
+  // Cleanup on unload
+  window.addEventListener('beforeunload', () => {
+    if (animationId) cancelAnimationFrame(animationId);
+  });
 })();
 
-// 🖼️ Enhanced Profile Picture Interactions
+// ====== PROFILE PICTURE INTERACTIONS ======
 document.addEventListener('DOMContentLoaded', () => {
   const profilePicWrapper = document.querySelector('.profile-pic-wrapper');
   const profilePic = document.querySelector('.profile-pic');
   
   if (profilePicWrapper && profilePic) {
-    // Add click interaction for fun effect
+    // Optimized click interaction
     profilePicWrapper.addEventListener('click', () => {
-      profilePicWrapper.style.animation = 'none';
       profilePic.style.transform = 'scale(1.2) rotate(360deg)';
       
       setTimeout(() => {
         profilePic.style.transform = '';
-        profilePicWrapper.style.animation = 'float 6s ease-in-out infinite';
       }, 600);
     });
 
-    // Add mouse move parallax effect
-    profilePicWrapper.addEventListener('mousemove', (e) => {
+    // Throttled mouse move for parallax effect
+    const handleMouseMove = throttle((e) => {
       const rect = profilePicWrapper.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
@@ -294,8 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const rotateY = (mouseX / rect.width) * -10;
       
       profilePic.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-    });
+    }, 16); // ~60fps
 
+    profilePicWrapper.addEventListener('mousemove', handleMouseMove);
+    
     // Reset on mouse leave
     profilePicWrapper.addEventListener('mouseleave', () => {
       profilePic.style.transform = '';
@@ -303,59 +281,138 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 🎯 Enhanced Scroll Performance
-let ticking = false;
+// ====== INTERSECTION OBSERVER FOR BETTER PERFORMANCE ======
+if ('IntersectionObserver' in window) {
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
 
-function updateScrollEffects() {
-  revealOnScroll();
-  ticking = false;
-}
-
-function requestScrollUpdate() {
-  if (!ticking) {
-    requestAnimationFrame(updateScrollEffects);
-    ticking = true;
-  }
-}
-
-// Replace the existing scroll listener for reveal
-window.removeEventListener('scroll', revealOnScroll);
-window.addEventListener('scroll', requestScrollUpdate, { passive: true });
-
-// 🌟 Add some extra interactive elements
-document.addEventListener('DOMContentLoaded', () => {
-  // Add subtle parallax to hero section
-  const heroSection = document.querySelector('.home-section');
-  
-  if (heroSection) {
-    window.addEventListener('scroll', () => {
-      const scrolled = window.pageYOffset;
-      const rate = scrolled * -0.3;
-      
-      if (scrolled < window.innerHeight) {
-        heroSection.style.transform = `translateY(${rate}px)`;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
       }
-    }, { passive: true });
-  }
-
-  // Add intersection observer for better performance
-  if ('IntersectionObserver' in window) {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, observerOptions);
-
-    // Observe all scroll-reveal elements
-    document.querySelectorAll('.scroll-reveal').forEach(el => {
-      observer.observe(el);
     });
+  }, observerOptions);
+
+  // Observe all scroll-reveal elements
+  revealElements.forEach(el => observer.observe(el));
+}
+
+// ====== OPTIMIZED RIPPLE EFFECTS ======
+document.addEventListener('DOMContentLoaded', () => {
+  const addRippleEffect = (button) => {
+    button.addEventListener('click', function(e) {
+      // Remove existing ripples to prevent accumulation
+      const existingRipples = this.querySelectorAll('.ripple');
+      existingRipples.forEach(ripple => ripple.remove());
+      
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+
+      ripple.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+      `;
+      ripple.classList.add('ripple');
+
+      this.appendChild(ripple);
+
+      // Clean up after animation
+      setTimeout(() => {
+        if (ripple.parentNode) {
+          ripple.remove();
+        }
+      }, 600);
+    });
+  };
+
+  document.querySelectorAll('.btn, .project-link, .social-btn, .contact-form button').forEach(addRippleEffect);
+});
+
+// ====== OPTIMIZED CONTACT FORM ======
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('contactForm');
+  const toast = document.getElementById('toast');
+  const submitBtn = document.getElementById('send-btn');
+
+  if (form && submitBtn) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Optimized validation
+      const fields = form.querySelectorAll('input[required], textarea[required]');
+      let hasError = false;
+      
+      for (const field of fields) {
+        if (!field.value.trim()) {
+          field.classList.add('shake');
+          hasError = true;
+          // Remove shake class after animation
+          setTimeout(() => field.classList.remove('shake'), 400);
+        }
+      }
+      
+      if (hasError) return;
+
+      // Start loading state
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+      
+      try {
+        await fetch('https://formsubmit.co/ajax/amalkphilip2005@gmail.com', {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        // Success state
+        submitBtn.classList.remove('loading');
+        submitBtn.classList.add('success');
+        form.reset();
+
+        // Show toast
+        setTimeout(() => {
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 4000);
+        }, 250);
+
+        // Reset button after delay
+        setTimeout(() => {
+          submitBtn.classList.remove('success');
+          submitBtn.disabled = false;
+        }, 2600);
+
+      } catch (err) {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        alert('⚠️ Something went wrong. Try again later.');
+      }
+    });
+  }
+});
+
+// ====== INITIAL SETUP ON LOAD ======
+window.addEventListener('load', () => {
+  // Trigger initial scroll reveal check
+  handleScroll();
+  
+  // Initialize any elements that need setup
+  document.body.style.visibility = 'visible';
+});
+
+// ====== CLEANUP AND MEMORY MANAGEMENT ======
+window.addEventListener('beforeunload', () => {
+  // Cancel any running animations
+  if (typeof animationId !== 'undefined') {
+    cancelAnimationFrame(animationId);
   }
 });

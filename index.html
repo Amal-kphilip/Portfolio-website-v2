@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Portfolio</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="main-container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="logo">MyPortfolio</div>
+      <button class="hamburger" onclick="toggleMenu()">☰</button>
+      <nav id="nav-menu" class="hidden">
+        <ul class="nav-links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#contact">Contact Me</a></li>
+          <li class="theme-toggle-nav">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+              <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Home Section -->
+    <section id="home" class="home-section scroll-reveal">
+      <div class="home-content">
+        <h1 class="hero-name">Amal K Philip</h1>
+
+        <div class="marquee">
+          <div class="marquee-content">
+            <span>Web Developer</span>
+            <span class="separator">✖</span>
+            <span>UI/UX Enthusiast</span>
+            <span class="separator">✖</span>
+            <span>Open Source Contributor</span>
+            <span class="separator">✖</span>
+            <span>Problem Solver</span>
+            <span class="separator">✖</span>
+            <!-- duplicates for seamless loop -->
+            <span>Web Developer</span>
+            <span class="separator">✖</span>
+            <span>UI/UX Enthusiast</span>
+            <span class="separator">✖</span>
+            <span>Open Source Contributor</span>
+            <span class="separator">✖</span>
+            <span>Problem Solver</span>
+            <span class="separator">✖</span>
+          </div>
+        </div>
+
+        <a href="#projects" class="btn"><span>View Projects</span></a>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section scroll-reveal">
+      <div class="about-container">
+        <!-- Enhanced Profile Picture with Effects -->
+        <div class="profile-pic-container">
+          <div class="profile-pic-wrapper">
+            <img src="me-pic.jpg" alt="Profile Picture" class="profile-pic" />
+            <div class="profile-pic-overlay">
+              <div class="profile-pic-glow"></div>
+            </div>
+          </div>
+        </div>
+        
+        <h2>About Me</h2>
+        <p>Hello! I'm <strong>Amal K Philip</strong>, a 3rd-year BTech Computer Science student with a love for building user-friendly websites and solving real-world problems through code.</p>
+        <p>I'm learning core programming languages like C, C++, and JavaScript, with aspirations to become a full-stack developer and contribute to meaningful open-source projects.</p>
+        <div class="about-highlights">
+          <div class="highlight">
+            <h3>🎓 Education</h3>
+            <p>BTech in Computer Science<br> Vimal Jyothi Engineering College (2023 – Present)</p>
+          </div>
+          <div class="highlight">
+            <h3>💡 Interests</h3>
+            <p>Web Development, UI/UX Design, Open Source, Problem Solving</p>
+          </div>
+          <div class="highlight">
+            <h3>⚙️ Skills</h3>
+            <p>HTML, CSS, JavaScript, Git, C++, C, Java</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects-section scroll-reveal">
+      <div class="projects-container">
+        <h2>My Projects</h2>
+        <div class="projects-grid">
+          <div class="project-card">
+            <h3>Portfolio Website</h3>
+            <p>A responsive personal portfolio built using HTML, CSS, and JavaScript.</p>
+            <a href="https://github.com/Amal-kphilip/Portfolio-website" target="_blank" class="project-link">
+              <span>GitHub Repo</span>
+            </a>
+          </div>
+          <div class="project-card placeholder">
+            <div class="placeholder-content">
+              <p class="coming-text">Coming Soon</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section scroll-reveal">
+      <div class="contact-container">
+        <h2>Contact Me</h2>
+        <p>If you'd like to get in touch, feel free to send me a message!</p>
+        <form class="contact-form" id="contactForm">
+          <input type="text" name="name" placeholder="Your Name" required />
+          <input type="email" name="email" placeholder="Your Email" required />
+          <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+
+          <!-- Blob Button -->
+          <button type="submit" class="blob-btn" id="send-btn" aria-label="Send Message">
+            <div class="blob-btn__inner"></div>
+            <span class="button-text">Send Message</span>
+            <div class="loading-spinner"></div>
+            <svg class="success-check" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+          </button>
+
+          <div id="toast" class="toast">✅ Message Sent!</div>
+        </form>
+
+        <div class="contact-info-buttons">
+          <a href="mailto:amalkphilip2005@gmail.com" class="social-btn" target="_blank" rel="noopener">
+            <i class="fas fa-envelope" aria-hidden="true"></i><span>Email</span>
+          </a>
+          <a href="https://github.com/Amal-kphilip" class="social-btn" target="_blank" rel="noopener">
+            <i class="fab fa-github" aria-hidden="true"></i><span>GitHub</span>
+          </a>
+          <a href="https://www.instagram.com/amallkp" class="social-btn" target="_blank" rel="noopener">
+            <i class="fab fa-instagram" aria-hidden="true"></i><span>Instagram</span>
+          </a>
+          <a href="https://www.linkedin.com/in/amal-k-philip/" class="social-btn" target="_blank" rel="noopener">
+            <i class="fab fa-linkedin" aria-hidden="true"></i><span>LinkedIn</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
